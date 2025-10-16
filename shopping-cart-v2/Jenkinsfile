@@ -16,7 +16,7 @@ pipeline {
         }
         stage('Build Image') {
             when { expression { params.DEPLOY_TAG == '' } }
-        environment { QUAY = credentials('QUAY_USER') }
+            environment { QUAY = credentials('QUAY_USER') }
             steps {
                 dir('shopping-cart-v2') {
                     sh './scripts/include-container-extensions.sh'
@@ -41,22 +41,22 @@ pipeline {
                                 returnStatus: true
                             )
 
-                        if (status != 0) {
-                            error("Tag not found in Quay!")
+                            if (status != 0) {
+                                error('Tag not found in Quay!')
+                            }
+
+                            TAG_TO_DEPLOY = params.DEPLOY_TAG
                         }
 
-                        TAG_TO_DEPLOY = params.DEPLOY_TAG
-                    }
-
-                    sh """
+                        sh """
                         ./scripts/deploy-image.sh \
                         -u $QUAY_USR \
                         -n $APP_NAMESPACE \
                         -t $TAG_TO_DEPLOY
                     """
+                    }
                 }
             }
         }
     }
-    
 }
